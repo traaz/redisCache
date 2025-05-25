@@ -1,5 +1,6 @@
 package com.example.denemeApi;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,8 @@ public class RedisConfig {
         return new LettuceConnectionFactory("localhost", 6379);
     }
 
-    @Bean
+    //redise elle manuel bir şey yazarsak burası gerekli ve jdkreailization kullanma class ismini de yazar. cacheable ile spring redise yazıyor biz degil.
+   /* @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -31,12 +33,13 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
 
-    }
+    }*/
 
+    //docker exec -it my-redis redis-cli
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()                                                  //serileştirme yaparken class ismi ekleme
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(new ObjectMapper().deactivateDefaultTyping())))
                 .disableCachingNullValues();
 
         return RedisCacheManager.builder(connectionFactory)
